@@ -136,6 +136,11 @@ app.post('/interactions', async function (req, res) {
   });
 });
 
+// Add this route to respond to pings
+app.get('/heartbeat', (req, res) => {
+  res.status(200).send('Bot is alive! 🚀');
+});
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log('Server is running on port', PORT);
