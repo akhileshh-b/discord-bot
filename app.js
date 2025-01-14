@@ -9,7 +9,7 @@ import { scheduleMessage } from './utils.js';
 
 const app = express();
 
-// Verify Discord requests middleware for /interactions only
+// Verify Discord requests middleware
 function verifyDiscordRequest(clientKey) {
   return async function (req, res, next) {
     const signature = req.headers['x-signature-ed25519'];
@@ -30,11 +30,11 @@ function verifyDiscordRequest(clientKey) {
   };
 }
 
-// Parse JSON body and verify requests for all routes
+// Parse JSON body and verify requests
 app.use(express.json({ verify: (req, res, buf) => { req.rawBody = buf.toString() } }));
+app.use(verifyDiscordRequest(process.env.PUBLIC_KEY));
 
-// Apply Discord verification only to /interactions route
-app.post('/interactions', verifyDiscordRequest(process.env.PUBLIC_KEY), async function (req, res) {
+app.post('/interactions', async function (req, res) {
   const { type, data } = req.body;
 
   if (type === InteractionType.PING) {
@@ -134,11 +134,6 @@ app.post('/interactions', verifyDiscordRequest(process.env.PUBLIC_KEY), async fu
       content: 'Command not found',
     },
   });
-});
-
-// Add the heartbeat route that doesn't need verification
-app.get('/heartbeat', (req, res) => {
-  res.status(200).send('Bot is alive! 🚀');
 });
 
 const PORT = process.env.PORT || 3000;
